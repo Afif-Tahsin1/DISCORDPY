@@ -1,3 +1,20 @@
+from aiohttp import web
+import asyncio
+import os
+
+# --- ফেক সার্ভার লজিক ---
+async def handle(request):
+    return web.Response(text="Bot is running!")
+
+async def start_server():
+    app = web.Application()
+    app.add_routes([web.get('/', handle)])
+    runner = web.AppRunner(app)
+    await runner.setup()
+    # Koyeb সাধারণত ৮০০০ পোর্ট চেক করে
+    site = web.TCPSite(runner, '0.0.0.0', 8000) 
+    await site.start()
+# -----------------------
 import discord
 from discord.ext import commands
 from discord import app_commands
