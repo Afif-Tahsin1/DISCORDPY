@@ -2,18 +2,24 @@ from aiohttp import web
 import asyncio
 import os
 
-# --- ফেক সার্ভার লজিক ---
-async def handle(request):
-    return web.Response(text="Bot is running!")
+from aiohttp import web
+import asyncio
 
-async def start_server():
+# ফেক সার্ভার যা Koyeb-কে শান্ত রাখবে
+async def onboard(request):
+    return web.Response(text="I am alive!")
+
+async def start_fake_server():
     app = web.Application()
-    app.add_routes([web.get('/', handle)])
+    app.router.add_get("/", onboard)
     runner = web.AppRunner(app)
     await runner.setup()
-    # Koyeb সাধারণত ৮০০০ পোর্ট চেক করে
-    site = web.TCPSite(runner, '0.0.0.0', 8000) 
+    # Koyeb এই পোর্টের জন্যই অপেক্ষা করে
+    site = web.TCPSite(runner, "0.0.0.0", 8000) 
     await site.start()
+    print("Koyeb Health Check Bypass: Port 8000 is now active.")
+
+
 # -----------------------
 import discord
 from discord.ext import commands
@@ -63,6 +69,11 @@ intents.members = True
 bot = commands.Bot(command_prefix=["!", "?", ".", "$"], intents=intents)
 wChannel = {}
 lChannel = {}
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user}')
+    # এটি আলাদা টাস্ক হিসেবে রান করবে
+    bot.loop.create_task(start_fake_server())
 
 @bot.event
 async def on_ready():
